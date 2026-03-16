@@ -74,6 +74,13 @@ port := typeconv.MustInt("8080") // 8080
 | `Deref[T any](p *T, fallback T) T` | Dereference or fallback |
 | `DerefOrZero[T any](p *T) T` | Dereference or zero value |
 
+## Development
+
+```bash
+go test ./...
+go vet ./...
+```
+
 ## License
 
 MIT
