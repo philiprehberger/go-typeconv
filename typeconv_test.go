@@ -378,5 +378,401 @@ func TestMustDuration_Success(t *testing.T) {
 	}
 }
 
+// --- ToIntSlice tests ---
+
+func TestToIntSlice_FromIntSlice(t *testing.T) {
+	input := []int{1, 2, 3}
+	got, err := ToIntSlice(input)
+	if err != nil {
+		t.Fatalf("ToIntSlice([]int) returned error: %v", err)
+	}
+	if len(got) != 3 || got[0] != 1 || got[1] != 2 || got[2] != 3 {
+		t.Errorf("ToIntSlice([]int) = %v, want [1 2 3]", got)
+	}
+}
+
+func TestToIntSlice_FromAnySlice(t *testing.T) {
+	input := []any{1, "2", float64(3.0)}
+	got, err := ToIntSlice(input)
+	if err != nil {
+		t.Fatalf("ToIntSlice([]any) returned error: %v", err)
+	}
+	if len(got) != 3 || got[0] != 1 || got[1] != 2 || got[2] != 3 {
+		t.Errorf("ToIntSlice([]any) = %v, want [1 2 3]", got)
+	}
+}
+
+func TestToIntSlice_FromStringSlice(t *testing.T) {
+	input := []string{"10", "20", "30"}
+	got, err := ToIntSlice(input)
+	if err != nil {
+		t.Fatalf("ToIntSlice([]string) returned error: %v", err)
+	}
+	if len(got) != 3 || got[0] != 10 || got[1] != 20 || got[2] != 30 {
+		t.Errorf("ToIntSlice([]string) = %v, want [10 20 30]", got)
+	}
+}
+
+func TestToIntSlice_FromFloat64Slice(t *testing.T) {
+	input := []float64{1.0, 2.0, 3.0}
+	got, err := ToIntSlice(input)
+	if err != nil {
+		t.Fatalf("ToIntSlice([]float64) returned error: %v", err)
+	}
+	if len(got) != 3 || got[0] != 1 || got[1] != 2 || got[2] != 3 {
+		t.Errorf("ToIntSlice([]float64) = %v, want [1 2 3]", got)
+	}
+}
+
+func TestToIntSlice_FromFloat64Slice_Fractional(t *testing.T) {
+	input := []float64{1.0, 2.5}
+	_, err := ToIntSlice(input)
+	if err == nil {
+		t.Fatal("ToIntSlice with fractional float64 should return error")
+	}
+}
+
+func TestToIntSlice_FromInt64Slice(t *testing.T) {
+	input := []int64{100, 200}
+	got, err := ToIntSlice(input)
+	if err != nil {
+		t.Fatalf("ToIntSlice([]int64) returned error: %v", err)
+	}
+	if len(got) != 2 || got[0] != 100 || got[1] != 200 {
+		t.Errorf("ToIntSlice([]int64) = %v, want [100 200]", got)
+	}
+}
+
+func TestToIntSlice_EmptySlice(t *testing.T) {
+	got, err := ToIntSlice([]any{})
+	if err != nil {
+		t.Fatalf("ToIntSlice([]any{}) returned error: %v", err)
+	}
+	if len(got) != 0 {
+		t.Errorf("ToIntSlice([]any{}) = %v, want []", got)
+	}
+}
+
+func TestToIntSlice_Nil(t *testing.T) {
+	_, err := ToIntSlice(nil)
+	if err == nil {
+		t.Fatal("ToIntSlice(nil) should return error")
+	}
+}
+
+func TestToIntSlice_Invalid(t *testing.T) {
+	_, err := ToIntSlice("not a slice")
+	if err == nil {
+		t.Fatal("ToIntSlice(string) should return error")
+	}
+}
+
+func TestToIntSlice_InvalidElement(t *testing.T) {
+	_, err := ToIntSlice([]any{1, "abc"})
+	if err == nil {
+		t.Fatal("ToIntSlice with unconvertible element should return error")
+	}
+}
+
+// --- ToFloat64Slice tests ---
+
+func TestToFloat64Slice_FromFloat64Slice(t *testing.T) {
+	input := []float64{1.1, 2.2, 3.3}
+	got, err := ToFloat64Slice(input)
+	if err != nil {
+		t.Fatalf("ToFloat64Slice([]float64) returned error: %v", err)
+	}
+	if len(got) != 3 || got[0] != 1.1 || got[1] != 2.2 || got[2] != 3.3 {
+		t.Errorf("ToFloat64Slice([]float64) = %v, want [1.1 2.2 3.3]", got)
+	}
+}
+
+func TestToFloat64Slice_FromAnySlice(t *testing.T) {
+	input := []any{1, "2.5", float64(3.0)}
+	got, err := ToFloat64Slice(input)
+	if err != nil {
+		t.Fatalf("ToFloat64Slice([]any) returned error: %v", err)
+	}
+	if len(got) != 3 || got[0] != 1.0 || got[1] != 2.5 || got[2] != 3.0 {
+		t.Errorf("ToFloat64Slice([]any) = %v, want [1 2.5 3]", got)
+	}
+}
+
+func TestToFloat64Slice_FromStringSlice(t *testing.T) {
+	input := []string{"1.5", "2.5"}
+	got, err := ToFloat64Slice(input)
+	if err != nil {
+		t.Fatalf("ToFloat64Slice([]string) returned error: %v", err)
+	}
+	if len(got) != 2 || got[0] != 1.5 || got[1] != 2.5 {
+		t.Errorf("ToFloat64Slice([]string) = %v, want [1.5 2.5]", got)
+	}
+}
+
+func TestToFloat64Slice_FromIntSlice(t *testing.T) {
+	input := []int{1, 2, 3}
+	got, err := ToFloat64Slice(input)
+	if err != nil {
+		t.Fatalf("ToFloat64Slice([]int) returned error: %v", err)
+	}
+	if len(got) != 3 || got[0] != 1.0 || got[1] != 2.0 || got[2] != 3.0 {
+		t.Errorf("ToFloat64Slice([]int) = %v, want [1 2 3]", got)
+	}
+}
+
+func TestToFloat64Slice_FromInt64Slice(t *testing.T) {
+	input := []int64{10, 20}
+	got, err := ToFloat64Slice(input)
+	if err != nil {
+		t.Fatalf("ToFloat64Slice([]int64) returned error: %v", err)
+	}
+	if len(got) != 2 || got[0] != 10.0 || got[1] != 20.0 {
+		t.Errorf("ToFloat64Slice([]int64) = %v, want [10 20]", got)
+	}
+}
+
+func TestToFloat64Slice_EmptySlice(t *testing.T) {
+	got, err := ToFloat64Slice([]any{})
+	if err != nil {
+		t.Fatalf("ToFloat64Slice([]any{}) returned error: %v", err)
+	}
+	if len(got) != 0 {
+		t.Errorf("ToFloat64Slice([]any{}) = %v, want []", got)
+	}
+}
+
+func TestToFloat64Slice_Nil(t *testing.T) {
+	_, err := ToFloat64Slice(nil)
+	if err == nil {
+		t.Fatal("ToFloat64Slice(nil) should return error")
+	}
+}
+
+func TestToFloat64Slice_Invalid(t *testing.T) {
+	_, err := ToFloat64Slice(42)
+	if err == nil {
+		t.Fatal("ToFloat64Slice(int) should return error")
+	}
+}
+
+func TestToFloat64Slice_InvalidElement(t *testing.T) {
+	_, err := ToFloat64Slice([]any{1.0, "notnum"})
+	if err == nil {
+		t.Fatal("ToFloat64Slice with unconvertible element should return error")
+	}
+}
+
+// --- ToTime tests ---
+
+func TestToTime_FromTimeTime(t *testing.T) {
+	now := time.Now()
+	got, err := ToTime(now)
+	if err != nil {
+		t.Fatalf("ToTime(time.Time) returned error: %v", err)
+	}
+	if !got.Equal(now) {
+		t.Errorf("ToTime(time.Time) = %v, want %v", got, now)
+	}
+}
+
+func TestToTime_FromStringRFC3339(t *testing.T) {
+	input := "2024-06-15T10:30:00Z"
+	got, err := ToTime(input)
+	if err != nil {
+		t.Fatalf("ToTime(%q) returned error: %v", input, err)
+	}
+	want := time.Date(2024, 6, 15, 10, 30, 0, 0, time.UTC)
+	if !got.Equal(want) {
+		t.Errorf("ToTime(%q) = %v, want %v", input, got, want)
+	}
+}
+
+func TestToTime_FromStringDateOnly(t *testing.T) {
+	input := "2024-06-15"
+	got, err := ToTime(input)
+	if err != nil {
+		t.Fatalf("ToTime(%q) returned error: %v", input, err)
+	}
+	want := time.Date(2024, 6, 15, 0, 0, 0, 0, time.UTC)
+	if !got.Equal(want) {
+		t.Errorf("ToTime(%q) = %v, want %v", input, got, want)
+	}
+}
+
+func TestToTime_FromStringDateTime(t *testing.T) {
+	input := "2024-06-15 10:30:00"
+	got, err := ToTime(input)
+	if err != nil {
+		t.Fatalf("ToTime(%q) returned error: %v", input, err)
+	}
+	want := time.Date(2024, 6, 15, 10, 30, 0, 0, time.UTC)
+	if !got.Equal(want) {
+		t.Errorf("ToTime(%q) = %v, want %v", input, got, want)
+	}
+}
+
+func TestToTime_FromInt64(t *testing.T) {
+	ts := int64(1718444400) // 2024-06-15 11:00:00 UTC
+	got, err := ToTime(ts)
+	if err != nil {
+		t.Fatalf("ToTime(int64) returned error: %v", err)
+	}
+	want := time.Unix(ts, 0)
+	if !got.Equal(want) {
+		t.Errorf("ToTime(int64) = %v, want %v", got, want)
+	}
+}
+
+func TestToTime_FromInt64_Zero(t *testing.T) {
+	got, err := ToTime(int64(0))
+	if err != nil {
+		t.Fatalf("ToTime(0) returned error: %v", err)
+	}
+	want := time.Unix(0, 0)
+	if !got.Equal(want) {
+		t.Errorf("ToTime(0) = %v, want %v", got, want)
+	}
+}
+
+func TestToTime_Nil(t *testing.T) {
+	_, err := ToTime(nil)
+	if err == nil {
+		t.Fatal("ToTime(nil) should return error")
+	}
+}
+
+func TestToTime_InvalidString(t *testing.T) {
+	_, err := ToTime("not-a-date")
+	if err == nil {
+		t.Fatal("ToTime(\"not-a-date\") should return error")
+	}
+}
+
+func TestToTime_InvalidType(t *testing.T) {
+	_, err := ToTime(3.14)
+	if err == nil {
+		t.Fatal("ToTime(float64) should return error")
+	}
+}
+
+// --- ToMap tests ---
+
+func TestToMap_FromMapStringAny(t *testing.T) {
+	input := map[string]any{"a": 1, "b": "two"}
+	got, err := ToMap(input)
+	if err != nil {
+		t.Fatalf("ToMap(map[string]any) returned error: %v", err)
+	}
+	if got["a"] != 1 || got["b"] != "two" {
+		t.Errorf("ToMap(map[string]any) = %v, want %v", got, input)
+	}
+}
+
+type testStruct struct {
+	Name    string
+	Age     int
+	hidden  string
+}
+
+func TestToMap_FromStruct(t *testing.T) {
+	input := testStruct{Name: "Alice", Age: 30, hidden: "secret"}
+	got, err := ToMap(input)
+	if err != nil {
+		t.Fatalf("ToMap(struct) returned error: %v", err)
+	}
+	if got["Name"] != "Alice" {
+		t.Errorf("ToMap(struct)[\"Name\"] = %v, want \"Alice\"", got["Name"])
+	}
+	if got["Age"] != 30 {
+		t.Errorf("ToMap(struct)[\"Age\"] = %v, want 30", got["Age"])
+	}
+	if _, ok := got["hidden"]; ok {
+		t.Error("ToMap(struct) should not include unexported fields")
+	}
+	if len(got) != 2 {
+		t.Errorf("ToMap(struct) has %d keys, want 2", len(got))
+	}
+}
+
+func TestToMap_FromStructPointer(t *testing.T) {
+	input := &testStruct{Name: "Bob", Age: 25}
+	got, err := ToMap(input)
+	if err != nil {
+		t.Fatalf("ToMap(*struct) returned error: %v", err)
+	}
+	if got["Name"] != "Bob" || got["Age"] != 25 {
+		t.Errorf("ToMap(*struct) = %v, unexpected", got)
+	}
+}
+
+func TestToMap_EmptyStruct(t *testing.T) {
+	input := struct{}{}
+	got, err := ToMap(input)
+	if err != nil {
+		t.Fatalf("ToMap(struct{}) returned error: %v", err)
+	}
+	if len(got) != 0 {
+		t.Errorf("ToMap(struct{}) has %d keys, want 0", len(got))
+	}
+}
+
+func TestToMap_Nil(t *testing.T) {
+	_, err := ToMap(nil)
+	if err == nil {
+		t.Fatal("ToMap(nil) should return error")
+	}
+}
+
+func TestToMap_NilPointer(t *testing.T) {
+	_, err := ToMap((*testStruct)(nil))
+	if err == nil {
+		t.Fatal("ToMap(nil pointer) should return error")
+	}
+}
+
+func TestToMap_Invalid(t *testing.T) {
+	_, err := ToMap(42)
+	if err == nil {
+		t.Fatal("ToMap(int) should return error")
+	}
+}
+
+// --- MustTime tests ---
+
+func TestMustTime_Success(t *testing.T) {
+	got := MustTime("2024-06-15T10:30:00Z")
+	want := time.Date(2024, 6, 15, 10, 30, 0, 0, time.UTC)
+	if !got.Equal(want) {
+		t.Errorf("MustTime() = %v, want %v", got, want)
+	}
+}
+
+func TestMustTime_Panic(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Fatal("MustTime(\"invalid\") should panic")
+		}
+	}()
+	MustTime("invalid")
+}
+
+// --- MustIntSlice tests ---
+
+func TestMustIntSlice_Success(t *testing.T) {
+	got := MustIntSlice([]any{1, 2, 3})
+	if len(got) != 3 || got[0] != 1 || got[1] != 2 || got[2] != 3 {
+		t.Errorf("MustIntSlice() = %v, want [1 2 3]", got)
+	}
+}
+
+func TestMustIntSlice_Panic(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Fatal("MustIntSlice(nil) should panic")
+		}
+	}()
+	MustIntSlice(nil)
+}
+
 // Ensure fmt import is used
 var _ = fmt.Sprint

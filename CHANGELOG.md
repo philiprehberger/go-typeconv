@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.0
+
+- Add `ToIntSlice` and `ToFloat64Slice` for typed slice conversions
+- Add `ToTime` for parsing strings (RFC3339, date, datetime), Unix timestamps, and time.Time
+- Add `ToMap` for converting structs and maps to map[string]any
+- Add `MustTime` and `MustIntSlice` panicking variants
+
 ## 0.1.3
 
 - Consolidate README badges onto single line, fix CHANGELOG format

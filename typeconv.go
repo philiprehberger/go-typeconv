@@ -8,6 +8,7 @@ package typeconv
 import (
 	"fmt"
 	"math"
+	"reflect"
 	"strconv"
 	"strings"
 	"time"
@@ -283,6 +284,177 @@ func ToStringSlice(v any) ([]string, error) {
 	}
 }
 
+// ToIntSlice converts a value to []int. Supported source types:
+//   - []int (pass through)
+//   - []any (each element is converted via ToInt)
+//   - []string (each element is parsed via ToInt)
+//   - []float64 (each element is converted via ToInt)
+//   - []int64 (each element is cast to int)
+func ToIntSlice(v any) ([]int, error) {
+	if v == nil {
+		return nil, fmt.Errorf("typeconv: cannot convert nil to []int")
+	}
+
+	switch val := v.(type) {
+	case []int:
+		return val, nil
+	case []any:
+		result := make([]int, len(val))
+		for i, elem := range val {
+			n, err := ToInt(elem)
+			if err != nil {
+				return nil, fmt.Errorf("typeconv: cannot convert element %d in slice: %w", i, err)
+			}
+			result[i] = n
+		}
+		return result, nil
+	case []string:
+		result := make([]int, len(val))
+		for i, elem := range val {
+			n, err := ToInt(elem)
+			if err != nil {
+				return nil, fmt.Errorf("typeconv: cannot convert element %d in slice: %w", i, err)
+			}
+			result[i] = n
+		}
+		return result, nil
+	case []float64:
+		result := make([]int, len(val))
+		for i, elem := range val {
+			n, err := ToInt(elem)
+			if err != nil {
+				return nil, fmt.Errorf("typeconv: cannot convert element %d in slice: %w", i, err)
+			}
+			result[i] = n
+		}
+		return result, nil
+	case []int64:
+		result := make([]int, len(val))
+		for i, elem := range val {
+			result[i] = int(elem)
+		}
+		return result, nil
+	default:
+		return nil, fmt.Errorf("typeconv: cannot convert %T to []int", v)
+	}
+}
+
+// ToFloat64Slice converts a value to []float64. Supported source types:
+//   - []float64 (pass through)
+//   - []any (each element is converted via ToFloat64)
+//   - []string (each element is parsed via ToFloat64)
+//   - []int (each element is cast to float64)
+//   - []int64 (each element is cast to float64)
+func ToFloat64Slice(v any) ([]float64, error) {
+	if v == nil {
+		return nil, fmt.Errorf("typeconv: cannot convert nil to []float64")
+	}
+
+	switch val := v.(type) {
+	case []float64:
+		return val, nil
+	case []any:
+		result := make([]float64, len(val))
+		for i, elem := range val {
+			f, err := ToFloat64(elem)
+			if err != nil {
+				return nil, fmt.Errorf("typeconv: cannot convert element %d in slice: %w", i, err)
+			}
+			result[i] = f
+		}
+		return result, nil
+	case []string:
+		result := make([]float64, len(val))
+		for i, elem := range val {
+			f, err := ToFloat64(elem)
+			if err != nil {
+				return nil, fmt.Errorf("typeconv: cannot convert element %d in slice: %w", i, err)
+			}
+			result[i] = f
+		}
+		return result, nil
+	case []int:
+		result := make([]float64, len(val))
+		for i, elem := range val {
+			result[i] = float64(elem)
+		}
+		return result, nil
+	case []int64:
+		result := make([]float64, len(val))
+		for i, elem := range val {
+			result[i] = float64(elem)
+		}
+		return result, nil
+	default:
+		return nil, fmt.Errorf("typeconv: cannot convert %T to []float64", v)
+	}
+}
+
+// ToTime converts a value to time.Time. Supported source types:
+//   - time.Time (pass through)
+//   - string (parsed as RFC3339, "2006-01-02", or "2006-01-02 15:04:05")
+//   - int64 (interpreted as Unix timestamp in seconds)
+func ToTime(v any) (time.Time, error) {
+	if v == nil {
+		return time.Time{}, fmt.Errorf("typeconv: cannot convert nil to time.Time")
+	}
+
+	switch val := v.(type) {
+	case time.Time:
+		return val, nil
+	case string:
+		if t, err := time.Parse(time.RFC3339, val); err == nil {
+			return t, nil
+		}
+		if t, err := time.Parse("2006-01-02 15:04:05", val); err == nil {
+			return t, nil
+		}
+		if t, err := time.Parse("2006-01-02", val); err == nil {
+			return t, nil
+		}
+		return time.Time{}, fmt.Errorf("typeconv: cannot parse string %q as time (supported: RFC3339, 2006-01-02, 2006-01-02 15:04:05)", val)
+	case int64:
+		return time.Unix(val, 0), nil
+	default:
+		return time.Time{}, fmt.Errorf("typeconv: cannot convert %T to time.Time", v)
+	}
+}
+
+// ToMap converts a value to map[string]any. Supported source types:
+//   - map[string]any (pass through)
+//   - struct (exported fields become keys, using field names)
+func ToMap(v any) (map[string]any, error) {
+	if v == nil {
+		return nil, fmt.Errorf("typeconv: cannot convert nil to map[string]any")
+	}
+
+	switch val := v.(type) {
+	case map[string]any:
+		return val, nil
+	default:
+		rv := reflect.ValueOf(v)
+		if rv.Kind() == reflect.Ptr {
+			if rv.IsNil() {
+				return nil, fmt.Errorf("typeconv: cannot convert nil pointer to map[string]any")
+			}
+			rv = rv.Elem()
+		}
+		if rv.Kind() != reflect.Struct {
+			return nil, fmt.Errorf("typeconv: cannot convert %T to map[string]any", v)
+		}
+		rt := rv.Type()
+		result := make(map[string]any, rt.NumField())
+		for i := 0; i < rt.NumField(); i++ {
+			field := rt.Field(i)
+			if !field.IsExported() {
+				continue
+			}
+			result[field.Name] = rv.Field(i).Interface()
+		}
+		return result, nil
+	}
+}
+
 // MustInt converts a value to int, panicking if the conversion fails.
 func MustInt(v any) int {
 	result, err := ToInt(v)
@@ -331,6 +503,24 @@ func MustBool(v any) bool {
 // MustDuration converts a value to time.Duration, panicking if the conversion fails.
 func MustDuration(v any) time.Duration {
 	result, err := ToDuration(v)
+	if err != nil {
+		panic(err)
+	}
+	return result
+}
+
+// MustTime converts a value to time.Time, panicking if the conversion fails.
+func MustTime(v any) time.Time {
+	result, err := ToTime(v)
+	if err != nil {
+		panic(err)
+	}
+	return result
+}
+
+// MustIntSlice converts a value to []int, panicking if the conversion fails.
+func MustIntSlice(v any) []int {
+	result, err := ToIntSlice(v)
 	if err != nil {
 		panic(err)
 	}
