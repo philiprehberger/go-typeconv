@@ -1,6 +1,6 @@
 # go-typeconv
 
-[![CI](https://github.com/philiprehberger/go-typeconv/actions/workflows/ci.yml/badge.svg)](https://github.com/philiprehberger/go-typeconv/actions/workflows/ci.yml) [![Go Reference](https://pkg.go.dev/badge/github.com/philiprehberger/go-typeconv.svg)](https://pkg.go.dev/github.com/philiprehberger/go-typeconv) [![License](https://img.shields.io/github/license/philiprehberger/go-typeconv)](LICENSE)
+[![CI](https://github.com/philiprehberger/go-typeconv/actions/workflows/ci.yml/badge.svg)](https://github.com/philiprehberger/go-typeconv/actions/workflows/ci.yml) [![Go Reference](https://pkg.go.dev/badge/github.com/philiprehberger/go-typeconv.svg)](https://pkg.go.dev/github.com/philiprehberger/go-typeconv) [![License](https://img.shields.io/github/license/philiprehberger/go-typeconv)](LICENSE) [![Sponsor](https://img.shields.io/badge/sponsor-GitHub%20Sponsors-ec6cb9)](https://github.com/sponsors/philiprehberger)
 
 Safe type conversion utilities for Go. Handle `interface{}` values from JSON, configs, and APIs
 
